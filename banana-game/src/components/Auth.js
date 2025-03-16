@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { auth } from '../firebase';
+import { auth } from '../firebase'; // No change here
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'; // Add these imports
 
 function Auth() {
   const [email, setEmail] = useState('');
@@ -10,10 +11,10 @@ function Auth() {
     e.preventDefault();
     try {
       if (isSignup) {
-        await auth.createUserWithEmailAndPassword(email, password);
+        await createUserWithEmailAndPassword(auth, email, password); // Updated syntax
         alert('Account created!');
       } else {
-        await auth.signInWithEmailAndPassword(email, password);
+        await signInWithEmailAndPassword(auth, email, password); // Updated syntax
         alert('Logged in!');
       }
     } catch (error) {

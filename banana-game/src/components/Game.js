@@ -13,8 +13,8 @@ function Game() {
     try {
       const response = await fetch('https://marcconrad.com/uob/banana/api.php?json');
       const data = await response.json();
-      setQuestion(data.question); // e.g., "5 + 🍌 = 8"
-      setSolution(data.solution); // e.g., 3
+      setQuestion(data.question);
+      setSolution(data.solution);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching question:', error);

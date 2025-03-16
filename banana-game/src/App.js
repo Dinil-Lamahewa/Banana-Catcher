@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { auth } from './firebase';
+import { auth } from './firebase'; // No change here
 import Auth from './components/Auth';
 import Menu from './components/Menu';
 import Game from './components/Game';
@@ -13,7 +13,7 @@ function App() {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setUser(user);
     });
-    return unsubscribe;
+    return unsubscribe; // Cleanup subscription
   }, []);
 
   return (
