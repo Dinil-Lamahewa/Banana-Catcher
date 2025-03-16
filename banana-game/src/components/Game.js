@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './Game.css';
 import { db, auth } from '../firebase';
+import { doc, setDoc } from 'firebase/firestore';
 
 function Game({ onGameOver }) {
   const [question, setQuestion] = useState('');
@@ -11,9 +12,34 @@ function Game({ onGameOver }) {
   const [score, setScore] = useState(0);
   const [loading, setLoading] = useState(true);
 
+  // Memoize fetchQuestion with useCallback, only depending on score
+  const fetchQuestion = useCallback(async () => {
+    if (score > 0) {
+      try {
+        await setDoc(doc(db, 'scores', auth.currentUser.uid), {
+          userId: auth.currentUser.uid,
+          highestScore: score,
+        }, { merge: true });
+      } catch (error) {
+        console.error('Error saving score:', error);
+      }
+    }
+    try {
+      const response = await fetch('https://marcconrad.com/uob/banana/api.php?json');
+      const data = await response.json();
+      setQuestion(data.question);
+      setSolution(data.solution);
+      setNumbers([]); // Reset numbers for new question
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching question:', error);
+      setLoading(false);
+    }
+  }, [score]); // Only score is a dependency
+
   useEffect(() => {
     fetchQuestion();
-  }, []);
+  }, [fetchQuestion]);
 
   useEffect(() => {
     if (!loading) {
@@ -44,7 +70,7 @@ function Game({ onGameOver }) {
               Math.abs(num.position - bucketPosition) < 10
             ) {
               setScore((prev) => prev + 10);
-              fetchQuestion(); // New question
+              fetchQuestion();
               return false;
             } else if (num.top > 100) {
               setHealth((prev) => {
@@ -58,9 +84,9 @@ function Game({ onGameOver }) {
           return true;
         })
       );
-    }, 1000 / 60); // 60 FPS
+    }, 1000 / 60);
     return () => clearInterval(interval);
-  }, [bucketPosition, solution, onGameOver, score]);
+  }, [bucketPosition, solution, onGameOver, score, fetchQuestion]);
 
   useEffect(() => {
     const handleKeyPress = (e) => {
@@ -73,26 +99,6 @@ function Game({ onGameOver }) {
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [bucketPosition]);
-
-  const fetchQuestion = async () => {
-    if (score > 0) {
-      await db.collection('scores').doc(auth.currentUser.uid).set({
-        userId: auth.currentUser.uid,
-        highestScore: score,
-      }, { merge: true });
-    }
-    try {
-      const response = await fetch('https://marcconrad.com/uob/banana/api.php?json');
-      const data = await response.json();
-      setQuestion(data.question);
-      setSolution(data.solution);
-      setNumbers([]);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching question:', error);
-      setLoading(false);
-    }
-  };
 
   if (loading) return <p>Loading...</p>;
 

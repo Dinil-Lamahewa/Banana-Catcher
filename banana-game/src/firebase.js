@@ -1,9 +1,7 @@
-// Import specific functions from Firebase modules
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
-// Your Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAVZBYIviuhJdYckDLb8tiZ_kvuQPkkdCU",
   authDomain: "bananagame-dd40f.firebaseapp.com",
@@ -14,9 +12,6 @@ const firebaseConfig = {
   measurementId: "G-RDCCHKNG0N"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// Initialize Authentication and Firestore
 export const auth = getAuth(app);
 export const db = getFirestore(app);
