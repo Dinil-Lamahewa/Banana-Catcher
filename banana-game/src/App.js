@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { auth } from './firebase'; // No change here
+import { auth } from './firebase';
 import Auth from './components/Auth';
 import Menu from './components/Menu';
 import Game from './components/Game';
+import Scores from './components/Scores';
 import './App.css';
 
 function App() {
@@ -33,7 +34,7 @@ function App() {
         ) : screen === 'game' ? (
           <Game onGameOver={handleGameOver} />
         ) : (
-          <h1>{finalScore !== null ? `Final Score: ${finalScore}` : 'Scores Screen'}</h1>
+          <Scores />
         )
       ) : (
         <Auth />
