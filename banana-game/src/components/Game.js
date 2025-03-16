@@ -12,7 +12,9 @@ function Game({ onGameOver }) {
   const [score, setScore] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  // Memoize fetchQuestion with useCallback, only depending on score
+  const bucketWidth = 5;
+  const bucketHeight = 95;
+
   const fetchQuestion = useCallback(async () => {
     if (score > 0) {
       try {
@@ -29,27 +31,33 @@ function Game({ onGameOver }) {
       const data = await response.json();
       setQuestion(data.question);
       setSolution(data.solution);
-      setNumbers([]); // Reset numbers for new question
+      setNumbers([]);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching question:', error);
       setLoading(false);
     }
-  }, [score]); // Only score is a dependency
+  }, [score]);
 
   useEffect(() => {
     fetchQuestion();
   }, [fetchQuestion]);
 
   useEffect(() => {
-    if (!loading) {
-      const randomNumbers = [
-        solution,
-        Math.floor(Math.random() * 10),
-        Math.floor(Math.random() * 10),
-        Math.floor(Math.random() * 10),
-      ].sort(() => Math.random() - 0.5);
-      setNumbers(randomNumbers.map((num, idx) => ({
+    if (!loading && solution !== null) {
+      // Function to generate unique random numbers
+      const generateUniqueNumbers = (exclude, count, min, max) => {
+        const uniqueNumbers = new Set([exclude]); // Start with solution
+        while (uniqueNumbers.size < count) {
+          const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
+          uniqueNumbers.add(randomNum);
+        }
+        return Array.from(uniqueNumbers);
+      };
+
+      const randomNumbers = generateUniqueNumbers(solution, 4, 0, 9); // 4 unique numbers including solution
+      const shuffledNumbers = randomNumbers.sort(() => Math.random() - 0.5); // Shuffle them
+      setNumbers(shuffledNumbers.map((num, idx) => ({
         value: num,
         position: 25 * idx + 10,
         top: 0,
@@ -64,36 +72,40 @@ function Game({ onGameOver }) {
           ...num,
           top: num.top + 1,
         })).filter((num) => {
-          if (num.top >= 90) {
+          if (num.top >= bucketHeight && num.top <= bucketHeight + 1) {
+            const bucketLeft = bucketPosition;
+            const bucketRight = bucketPosition + bucketWidth;
             if (
               num.value === solution &&
-              Math.abs(num.position - bucketPosition) < 10
+              num.position >= bucketLeft && num.position <= bucketRight
             ) {
               setScore((prev) => prev + 10);
               fetchQuestion();
               return false;
-            } else if (num.top > 100) {
-              setHealth((prev) => {
-                const newHealth = prev - 1;
-                if (newHealth <= 0) onGameOver(score);
-                return newHealth;
-              });
-              return false;
             }
+          } else if (num.top > 100) {
+            setHealth((prev) => prev - 1);
+            return false;
           }
           return true;
         })
       );
     }, 1000 / 60);
     return () => clearInterval(interval);
-  }, [bucketPosition, solution, onGameOver, score, fetchQuestion]);
+  }, [bucketPosition, solution, score, fetchQuestion, bucketWidth, bucketHeight]);
+
+  useEffect(() => {
+    if (health <= 0) {
+      onGameOver(score);
+    }
+  }, [health, score, onGameOver]);
 
   useEffect(() => {
     const handleKeyPress = (e) => {
       if (e.key === 'ArrowLeft' && bucketPosition > 0) {
-        setBucketPosition(bucketPosition - 10);
+        setBucketPosition(bucketPosition - 1);
       } else if (e.key === 'ArrowRight' && bucketPosition < 90) {
-        setBucketPosition(bucketPosition + 10);
+        setBucketPosition(bucketPosition + 1);
       }
     };
     window.addEventListener('keydown', handleKeyPress);
@@ -105,7 +117,7 @@ function Game({ onGameOver }) {
   return (
     <div className="game-container">
       <h2>Game</h2>
-      <p>Question: {question}</p>
+      <img src= {question} alt="Quteion.img"/>
       <p>Health: {health} | Score: {score}</p>
       <div className="game-area">
         {numbers.map((num, idx) => (
