@@ -1,0 +1,33 @@
+.game-container {
+    text-align: center;
+    position: relative;
+    height: 80vh;
+  }
+  
+  .game-area {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    border: 1px solid #ccc;
+    overflow: hidden;
+  }
+  
+  .falling-number {
+    position: absolute;
+    font-size: 24px;
+    animation: fall 60s linear infinite;
+  }
+  
+  @keyframes fall {
+    0% { top: 0%; }
+    100% { top: 100%; }
+  }
+  
+  .bucket {
+    position: absolute;
+    bottom: 10px;
+    width: 50px;
+    height: 30px;
+    background-color: blue;
+    transition: left 0.1s ease;
+  }
