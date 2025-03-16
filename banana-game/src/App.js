@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { auth } from './firebase';
 import Auth from './components/Auth';
 import Menu from './components/Menu';
+import Game from './components/Game';
 import './App.css';
 
 function App() {
@@ -24,7 +25,7 @@ function App() {
             onScores={() => setScreen('scores')}
           />
         ) : screen === 'game' ? (
-          <h1>Game Screen (To Be Built)</h1>
+          <Game />
         ) : (
           <h1>Scores Screen (To Be Built)</h1>
         )
